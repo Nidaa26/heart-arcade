@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Heartful — a cozy little arcade game about catching floating hearts and dodging the broken ones." />
+  <meta name="theme-color" content="#FFF9F8" />
+  <title>Heartful — a cozy catching game</title>
+
+  <link rel="icon" type="image/svg+xml" href="static/images/favicon.svg" />
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+
+<body>
+  <!-- ===================================================================
+       Loading screen — a little beating heart while everything warms up.
+  ==================================================================== -->
+  <div id="loader" class="loader" aria-hidden="false">
+    <div class="loader__heart" aria-hidden="true"></div>
+    <p class="loader__label">warming up the hearts<span class="loader__dots"></span></p>
+    <div class="loader__bar"><span class="loader__fill"></span></div>
+  </div>
+
+  <!-- ===================================================================
+       Stacked canvases:
+         #bg-canvas   — drifting ambient hearts + sparkles (parallax)
+         #game-canvas — the actual gameplay (hearts, player, score pops)
+         #fx-canvas   — bursts of confetti & sparkles on top of everything
+  ==================================================================== -->
+  <canvas id="bg-canvas" class="layer" aria-hidden="true"></canvas>
+  <canvas id="game-canvas" class="layer" aria-hidden="true"></canvas>
+  <canvas id="fx-canvas" class="layer" aria-hidden="true"></canvas>
+
+  <!-- ===================================================================
+       Heads-up display — styled like little scrapbook paper tags.
+  ==================================================================== -->
+  <header class="hud" aria-label="game status">
+    <!-- Score + remaining lives, taped to the top-left corner -->
+    <div class="tag tag--score reveal" data-reveal="1">
+      <span class="washi washi--a" aria-hidden="true"></span>
+      <p class="tag__label">score</p>
+      <p class="tag__value" id="score" aria-live="polite">0</p>
+      <div class="lives" id="lives" aria-label="lives remaining"></div>
+    </div>
+
+    <!-- Hand-lettered logo in the middle — also a tiny easter egg -->
+    <button class="brand reveal" id="brand" data-reveal="2" title="psst… try clicking me">
+      <span class="brand__heart" aria-hidden="true">♥</span>
+      <span class="brand__name">Heartful</span>
+    </button>
+
+    <!-- Best score, taped to the top-right corner -->
+    <div class="tag tag--best reveal" data-reveal="3">
+      <span class="washi washi--b" aria-hidden="true"></span>
+      <p class="tag__label">best</p>
+      <p class="tag__value" id="best">0</p>
+    </div>
+
+    <!-- Floating, transient feedback -->
+    <div class="combo" id="combo" aria-hidden="true"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Round scrapbook control buttons -->
+    <div class="controls reveal" data-reveal="4">
+      <button class="ctrl" id="btn-pause" title="Pause (P)" aria-label="Pause">
+        <span class="ctrl__icon" aria-hidden="true">❚❚</span>
+      </button>
+      <button class="ctrl" id="btn-mute" title="Mute (M)" aria-label="Toggle sound">
+        <span class="ctrl__icon" aria-hidden="true">♪</span>
+      </button>
+      <button class="ctrl" id="btn-restart" title="Restart (R)" aria-label="Restart">
+        <span class="ctrl__icon" aria-hidden="true">↺</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================================================================
+       Overlays (menu / pause / game over) — handcrafted paper notes.
+  ==================================================================== -->
+
+  <!-- Start menu -->
+  <div class="overlay is-open" id="menu">
+    <div class="note note--menu">
+      <span class="tape tape--top" aria-hidden="true"></span>
+      <span class="doodle doodle--tl" aria-hidden="true">✦</span>
+      <span class="doodle doodle--br" aria-hidden="true">♥</span>
+
+      <h1 class="note__title">Heartful</h1>
+      <p class="note__sub">a cozy little catching game</p>
+
+      <ul class="howto">
+        <li><span class="howto__icon good" aria-hidden="true"></span> move to <b>catch</b> the soft hearts</li>
+        <li><span class="howto__icon bad" aria-hidden="true"></span> gently <b>dodge</b> the broken ones</li>
+        <li><span class="howto__icon" aria-hidden="true">✧</span> chain catches for a <b>combo</b></li>
+      </ul>
+
+      <button class="btn btn--primary" id="btn-play">
+        <span>play</span>
+      </button>
+      <p class="note__hint">tip: works with mouse, trackpad or touch</p>
+    </div>
+  </div>
+
+  <!-- Pause -->
+  <div class="overlay" id="pause">
+    <div class="note note--small">
+      <span class="tape tape--top" aria-hidden="true"></span>
+      <h2 class="note__title">paused</h2>
+      <p class="note__sub">take a breath 🍵</p>
+      <div class="note__row">
+        <button class="btn btn--primary" id="btn-resume"><span>resume</span></button>
+        <button class="btn btn--ghost" id="btn-pause-restart"><span>restart</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game over -->
+  <div class="overlay" id="gameover">
+    <div class="note note--small">
+      <span class="tape tape--top" aria-hidden="true"></span>
+      <span class="doodle doodle--tl" aria-hidden="true">♡</span>
+      <h2 class="note__title" id="over-title">all done!</h2>
+      <p class="note__sub" id="over-message">that was lovely.</p>
+
+      <div class="scorecard">
+        <div class="scorecard__cell">
+          <span class="scorecard__label">score</span>
+          <span class="scorecard__num" id="final-score">0</span>
+        </div>
+        <div class="scorecard__divider" aria-hidden="true"></div>
+        <div class="scorecard__cell">
+          <span class="scorecard__label">best</span>
+          <span class="scorecard__num" id="final-best">0</span>
+        </div>
+      </div>
+
+      <p class="newbest" id="newbest" aria-hidden="true">✦ a brand new best! ✦</p>
+
+      <button class="btn btn--primary" id="btn-again"><span>play again</span></button>
+    </div>
+  </div>
+
+  <!-- Soft red flash shown briefly when a broken heart is touched -->
+  <div class="hurt-flash" id="hurt-flash" aria-hidden="true"></div>
+
+  <!-- Vendor-free scripts, loaded in dependency order -->
+  <script src="static/js/particles.js"></script>
+  <script src="static/js/game.js"></script>
+</body>
+</html>
