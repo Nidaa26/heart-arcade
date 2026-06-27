@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Cozy, hand-drawn style heart favicon. Pure SVG so it works offline. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F8C8DC"/>
+      <stop offset="1" stop-color="#C85A6A"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#FFF9F8"/>
+  <path d="M32 52C16 41 8 33 8 23.5 8 16 14 11 20.5 11c4.4 0 8.3 2.4 11.5 6.4C35.2 13.4 39.1 11 43.5 11 50 11 56 16 56 23.5 56 33 48 41 32 52z"
+        fill="url(#g)" stroke="#C85A6A" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- little glossy highlight -->
+  <ellipse cx="24" cy="24" rx="5" ry="7" fill="#FFFFFF" opacity="0.55" transform="rotate(-20 24 24)"/>
+</svg>
